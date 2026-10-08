@@ -33,6 +33,30 @@ class FakeApi implements LovebyteApi {
 
   @override
   Future<Partnership?> getPartnership(String accessToken) async => partnership;
+
+  @override
+  Future<Partnership> updateStartedOn(String accessToken, String startedOn) async {
+    return partnership!;
+  }
+
+  @override
+  Future<List<Note>> listNotes(String accessToken) async => [];
+
+  @override
+  Future<Note> createNote(String accessToken, String body) async => Note(id: 'n1', body: body);
+
+  @override
+  Future<List<CoupleEvent>> listEvents(String accessToken) async => [];
+
+  @override
+  Future<CoupleEvent> createEvent(
+    String accessToken, {
+    required String title,
+    required DateTime startsAt,
+    required int remindOffsetMinutes,
+  }) async {
+    return CoupleEvent(id: 'e1', title: title, countdownDays: 3);
+  }
 }
 
 void main() {

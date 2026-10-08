@@ -58,6 +58,45 @@ paths:
           description: Partnership
         '404':
           description: Caller is not paired
+    patch:
+      summary: Set the day the partnership started
+      responses:
+        '200':
+          description: Partnership with daysTogether
+  /v1/notes:
+    get:
+      summary: List notes in the partnership
+      responses:
+        '200':
+          description: Notes
+    post:
+      summary: Create a note
+      responses:
+        '201':
+          description: Note
+  /v1/notes/{id}:
+    patch:
+      summary: Edit a note
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Note
+  /v1/events:
+    get:
+      summary: List events with countdownDays
+      responses:
+        '200':
+          description: Events
+    post:
+      summary: Create an event and send a due reminder to the partner
+      responses:
+        '201':
+          description: Event
   /v1/partnerships/{id}/leave:
     post:
       summary: Close the partnership for both members

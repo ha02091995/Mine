@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { z } from 'zod';
+import { parseBody } from '../common/http';
 import { AuthContext, CurrentAuth } from '../identity/auth.context';
 import { AuthGuard } from '../identity/auth.guard';
 import { PairService } from './pair.service';
@@ -21,6 +23,15 @@ export class PairController {
   @Get('partnership')
   getPartnership(@CurrentAuth() auth: AuthContext) {
     return this.pairs.getForUser(auth.userId);
+  }
+
+  @Patch('partnership')
+  updatePartnership(@CurrentAuth() auth: AuthContext, @Body() body: unknown) {
+    const parsed = parseBody(
+      z.object({ startedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }),
+      body,
+    );
+    return this.pairs.updateStartedOn(auth.userId, parsed.startedOn);
   }
 
   @Post('partnerships/:id/leave')
