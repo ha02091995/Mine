@@ -256,3 +256,29 @@ paths:
       responses:
         '201':
           description: Saved place
+  /v1/me/status:
+    put:
+      summary: Set battery and location sharing for the caller
+      responses:
+        '200':
+          description: Current status. Disabled location has no coordinates.
+        '403':
+          description: Location sharing flag is off
+  /v1/partners/{id}/status:
+    get:
+      summary: Read the partner's shared status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Enabled fields only
+  /v1/me/weather:
+    get:
+      summary: Weather by declared city, or by the current point while sharing
+      responses:
+        '200':
+          description: Temperature without coordinates

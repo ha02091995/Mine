@@ -26,6 +26,7 @@ model User {
   secrets     SecretMessage[]
   media       MediaObject[]
   stories     StoryEntry[]
+  status      StatusCurrent?
 
   @@map("users")
 }
@@ -328,4 +329,19 @@ model SavedItem {
 
   @@unique([partnershipId, placeId])
   @@map("saved_items")
+}
+
+model StatusCurrent {
+  userId           String    @id @map("user_id") @db.Uuid
+  batteryEnabled   Boolean   @default(false) @map("battery_enabled")
+  batteryPercent   Int?      @map("battery_percent")
+  locationEnabled  Boolean   @default(false) @map("location_enabled")
+  lat              Float?
+  lng              Float?
+  locationAt       DateTime? @map("location_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("status_current")
 }

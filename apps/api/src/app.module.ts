@@ -9,6 +9,7 @@ import { MediaModule } from './media/media.module';
 import { NotesModule } from './notes/notes.module';
 import { PairModule } from './pair/pair.module';
 import { SecretModule } from './secret/secret.module';
+import { StatusModule } from './status/status.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 
@@ -25,6 +26,7 @@ import { RedisModule } from './redis/redis.module';
     SecretModule,
     MediaModule,
     ListsModule,
+    StatusModule,
   ],
   controllers: [HealthController],
 })

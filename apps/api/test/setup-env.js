@@ -6,3 +6,4 @@ process.env.OTP_LOG_CODE = 'true';
 process.env.JWT_ACCESS_TTL = '900';
 process.env.MEDIA_DIR = process.env.MEDIA_DIR || '/tmp/lovebyte-media-test';
 process.env.MEDIA_SECRET = process.env.MEDIA_SECRET || 'test-media-secret';
+process.env.LOCATION_SHARING = 'true';
