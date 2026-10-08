@@ -11,6 +11,7 @@ model User {
   id          String    @id @default(uuid()) @db.Uuid
   destination String    @unique
   displayName String    @map("display_name")
+  city        String?
   createdAt   DateTime  @default(now()) @map("created_at")
   deletedAt   DateTime? @map("deleted_at")
 
@@ -74,6 +75,8 @@ model Partnership {
   media    MediaObject[]
   albums   Album[]
   stories  StoryEntry[]
+  lists    SharedList[]
+  saved    SavedItem[]
 
   @@map("partnerships")
 }
@@ -274,4 +277,55 @@ model StoryEntry {
 
   @@index([partnershipId, position])
   @@map("story_entries")
+}
+
+model SharedList {
+  id            String   @id @default(uuid()) @db.Uuid
+  partnershipId String   @map("partnership_id") @db.Uuid
+  title         String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  partnership Partnership      @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  items       SharedListItem[]
+
+  @@index([partnershipId, createdAt])
+  @@map("shared_lists")
+}
+
+model SharedListItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  listId    String   @map("list_id") @db.Uuid
+  body      String
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  list SharedList @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@index([listId, createdAt])
+  @@map("shared_list_items")
+}
+
+model DiscoverPlace {
+  id      String @id @default(uuid()) @db.Uuid
+  city    String
+  title   String
+  summary String
+
+  saved SavedItem[]
+
+  @@index([city])
+  @@map("discover_places")
+}
+
+model SavedItem {
+  id            String   @id @default(uuid()) @db.Uuid
+  partnershipId String   @map("partnership_id") @db.Uuid
+  placeId       String   @map("place_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  partnership Partnership    @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  place       DiscoverPlace  @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([partnershipId, placeId])
+  @@map("saved_items")
 }

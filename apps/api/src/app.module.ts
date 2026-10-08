@@ -4,6 +4,7 @@ import { ChatModule } from './chat/chat.module';
 import { DatesModule } from './dates/dates.module';
 import { HealthController } from './health.controller';
 import { IdentityModule } from './identity/identity.module';
+import { ListsModule } from './lists/lists.module';
 import { MediaModule } from './media/media.module';
 import { NotesModule } from './notes/notes.module';
 import { PairModule } from './pair/pair.module';
@@ -23,6 +24,7 @@ import { RedisModule } from './redis/redis.module';
     ChatModule,
     SecretModule,
     MediaModule,
+    ListsModule,
   ],
   controllers: [HealthController],
 })
