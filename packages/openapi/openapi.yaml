@@ -294,3 +294,33 @@ paths:
       responses:
         '200':
           description: Temperature without coordinates
+  /v1/stickers:
+    get:
+      summary: Free stickers plus downloadable packs and whether the caller owns them
+      responses:
+        '200':
+          description: Sticker catalog
+  /v1/sticker-packs/{packId}:
+    post:
+      summary: Grant a downloadable sticker pack
+      parameters:
+        - in: path
+          name: packId
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Pack owned
+  /v1/me/export:
+    get:
+      summary: Export partnership data with expiring image URLs
+      responses:
+        '200':
+          description: JSON archive
+  /v1/me/deletion:
+    post:
+      summary: Revoke sessions, drop push tokens, leave the pair, and queue image deletion
+      responses:
+        '201':
+          description: Account deleted

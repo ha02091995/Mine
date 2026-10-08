@@ -25,8 +25,9 @@ model User {
   receipts    MessageReceipt[]
   secrets     SecretMessage[]
   media       MediaObject[]
-  stories     StoryEntry[]
-  status      StatusCurrent?
+  stories      StoryEntry[]
+  status       StatusCurrent?
+  entitlements StickerEntitlement[]
 
   @@map("users")
 }
@@ -229,6 +230,7 @@ model MediaObject {
   owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   items       AlbumItem[]
   stories     StoryEntry[]
+  deletions   DeletionJob[]
 
   @@index([partnershipId, createdAt])
   @@map("media_objects")
@@ -344,4 +346,28 @@ model StatusCurrent {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("status_current")
+}
+
+model StickerEntitlement {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  packId    String   @map("pack_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, packId])
+  @@map("sticker_entitlements")
+}
+
+model DeletionJob {
+  id        String   @id @default(uuid()) @db.Uuid
+  mediaId   String   @map("media_id") @db.Uuid
+  status    String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  media MediaObject @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@map("deletion_jobs")
 }

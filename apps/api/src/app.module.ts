@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AccountModule } from './account/account.module';
 import { ChatModule } from './chat/chat.module';
 import { DatesModule } from './dates/dates.module';
 import { HealthController } from './health.controller';
@@ -27,6 +28,7 @@ import { RedisModule } from './redis/redis.module';
     MediaModule,
     ListsModule,
     StatusModule,
+    AccountModule,
   ],
   controllers: [HealthController],
 })

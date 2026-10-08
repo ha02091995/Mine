@@ -83,6 +83,29 @@ export class MediaService {
     return this.signedPath('GET', id, expires);
   }
 
+  async queueOwnedDeletions(userId: string) {
+    const owned = await this.prisma.mediaObject.findMany({
+      where: { ownerId: userId, deletedAt: null },
+    });
+    for (const media of owned) {
+      await this.prisma.deletionJob.create({ data: { mediaId: media.id, status: 'queued' } });
+    }
+    return this.processDeletionQueue();
+  }
+
+  async processDeletionQueue() {
+    const jobs = await this.prisma.deletionJob.findMany({ where: { status: 'queued' }, orderBy: { createdAt: 'asc' } });
+    for (const job of jobs) {
+      await rm(this.path(job.mediaId), { force: true });
+      await this.prisma.mediaObject.update({
+        where: { id: job.mediaId },
+        data: { deletedAt: new Date(), byteSize: null },
+      });
+      await this.prisma.deletionJob.update({ where: { id: job.id }, data: { status: 'done' } });
+    }
+    return jobs.length;
+  }
+
   private signedPath(method: string, id: string, expires: number) {
     const sig = this.sign(method, id, expires);
     return `/v1/media/${id}/content?expires=${expires}&sig=${sig}`;
