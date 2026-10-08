@@ -5,7 +5,7 @@ import { ApiException } from '../common/http';
 import { MembershipService } from '../pair/membership.service';
 import { PrismaService } from '../prisma/prisma.module';
 import { RedisService } from '../redis/redis.module';
-import { isFreeSticker } from './stickers';
+import { isFreeSticker, packForSticker } from './stickers';
 
 export interface MessageInput {
   clientMsgId: string;
@@ -37,8 +37,8 @@ export class ChatService {
     if (input.kind === 'text' && !input.body) {
       throw new ApiException(400, 'VALIDATION_ERROR', 'Text messages need a body');
     }
-    if (input.kind === 'sticker' && (!input.stickerId || !isFreeSticker(input.stickerId))) {
-      throw new ApiException(400, 'UNKNOWN_STICKER', 'Unknown sticker');
+    if (input.kind === 'sticker') {
+      await this.requireSticker(userId, input.stickerId);
     }
     try {
       const message = await this.prisma.message.create({
@@ -71,6 +71,17 @@ export class ChatService {
       }
       throw error;
     }
+  }
+
+  private async requireSticker(userId: string, stickerId: string | undefined) {
+    if (!stickerId) throw new ApiException(400, 'UNKNOWN_STICKER', 'Unknown sticker');
+    if (isFreeSticker(stickerId)) return;
+    const packId = packForSticker(stickerId);
+    if (!packId) throw new ApiException(400, 'UNKNOWN_STICKER', 'Unknown sticker');
+    const owned = await this.prisma.stickerEntitlement.findUnique({
+      where: { userId_packId: { userId, packId } },
+    });
+    if (!owned) throw new ApiException(403, 'STICKER_LOCKED', 'Download this sticker pack first');
   }
 
   async markRead(userId: string, partnershipId: string, messageId: string) {
