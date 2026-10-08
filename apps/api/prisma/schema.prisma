@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid()) @db.Uuid
+  destination String    @unique
+  displayName String    @map("display_name")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  devices     Device[]
+  sessions    Session[]
+  memberships PartnershipMember[]
+  invites     PairInvite[]
+
+  @@map("users")
+}
+
+model Device {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  platform   String
+  pushToken  String?  @map("push_token")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions Session[]
+
+  @@map("devices")
+}
+
+model Session {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  deviceId    String    @map("device_id") @db.Uuid
+  refreshHash String    @unique @map("refresh_hash")
+  expiresAt   DateTime  @map("expires_at")
+  revokedAt   DateTime? @map("revoked_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Partnership {
+  id        String    @id @default(uuid()) @db.Uuid
+  startedOn DateTime  @map("started_on") @db.Date
+  status    String
+  closedAt  DateTime? @map("closed_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  members PartnershipMember[]
+  invites PairInvite[]
+
+  @@map("partnerships")
+}
+
+model PartnershipMember {
+  id            String   @id @default(uuid()) @db.Uuid
+  partnershipId String   @map("partnership_id") @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  status        String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  partnership Partnership @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([partnershipId, userId])
+  @@index([userId, status])
+  @@map("partnership_members")
+}
+
+model PairInvite {
+  id            String    @id @default(uuid()) @db.Uuid
+  code          String    @unique
+  creatorId     String    @map("creator_id") @db.Uuid
+  expiresAt     DateTime  @map("expires_at")
+  usedAt        DateTime? @map("used_at")
+  partnershipId String?   @map("partnership_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  creator     User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  partnership Partnership? @relation(fields: [partnershipId], references: [id])
+
+  @@map("pair_invites")
+}

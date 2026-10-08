@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+  title: Lovebyte API
+  version: 0.1.0
+paths:
+  /v1/auth/otp:
+    post:
+      summary: Send a one-time code
+      responses:
+        '201':
+          description: Code stored and logged when OTP_LOG_CODE=true
+  /v1/auth/sessions:
+    post:
+      summary: Exchange a code for a session
+      responses:
+        '201':
+          description: Access token, refresh token, and user
+    delete:
+      summary: Revoke the current session
+      responses:
+        '200':
+          description: Session revoked
+  /v1/auth/sessions/refresh:
+    post:
+      summary: Rotate a refresh token
+      responses:
+        '201':
+          description: New token pair
+  /v1/invites:
+    post:
+      summary: Create a one-time pair invite
+      responses:
+        '201':
+          description: Invite code
+        '409':
+          description: Caller already has an active partnership
+  /v1/invites/{code}/accept:
+    post:
+      summary: Accept an invite and open the partnership
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Partnership
+        '409':
+          description: One of the two people is already paired
+        '410':
+          description: Invite expired or used
+  /v1/partnership:
+    get:
+      summary: Read the caller's active partnership
+      responses:
+        '200':
+          description: Partnership
+        '404':
+          description: Caller is not paired
+  /v1/partnerships/{id}/leave:
+    post:
+      summary: Close the partnership for both members
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Partnership closed
+        '403':
+          description: Caller is not an active member
