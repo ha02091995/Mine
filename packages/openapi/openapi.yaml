@@ -188,3 +188,71 @@ paths:
       responses:
         '201':
           description: Story entry
+  /v1/me:
+    get:
+      summary: Read the caller profile, including a self-declared city
+      responses:
+        '200':
+          description: Profile
+    patch:
+      summary: Set the self-declared city used by Discover
+      responses:
+        '200':
+          description: Profile
+  /v1/lists:
+    get:
+      summary: List shared checklists
+      responses:
+        '200':
+          description: Lists
+    post:
+      summary: Create a shared checklist
+      responses:
+        '201':
+          description: List
+  /v1/lists/{id}/items:
+    post:
+      summary: Add a checklist item
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Item
+  /v1/lists/{id}/items/{itemId}:
+    patch:
+      summary: Mark a checklist item done or not done
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item
+  /v1/discover:
+    get:
+      summary: Places for the caller's declared city
+      responses:
+        '200':
+          description: Catalog rows stored on the server
+  /v1/saved-items:
+    get:
+      summary: Ideas saved into the partnership
+      responses:
+        '200':
+          description: Saved places
+    post:
+      summary: Save a catalog place into the partnership
+      responses:
+        '201':
+          description: Saved place
