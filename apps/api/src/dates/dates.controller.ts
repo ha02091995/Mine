@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { parseBody } from '../common/http';
 import { AuthContext, CurrentAuth } from '../identity/auth.context';
@@ -26,5 +26,10 @@ export class DatesController {
   @Post()
   create(@CurrentAuth() auth: AuthContext, @Body() body: unknown) {
     return this.dates.create(auth.userId, parseBody(EventSchema, body));
+  }
+
+  @Patch(':id')
+  update(@CurrentAuth() auth: AuthContext, @Param('id') id: string, @Body() body: unknown) {
+    return this.dates.update(auth.userId, id, parseBody(EventSchema, body));
   }
 }
