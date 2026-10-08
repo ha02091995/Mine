@@ -47,6 +47,25 @@ export class DatesService {
     return this.view(event);
   }
 
+  async update(userId: string, eventId: string, input: EventInput) {
+    const member = await this.requirePair(userId);
+    const existing = await this.prisma.event.findFirst({
+      where: { id: eventId, partnershipId: member.partnershipId },
+    });
+    if (!existing) throw new ApiException(404, 'EVENT_NOT_FOUND', 'Event not found');
+    const event = await this.prisma.event.update({
+      where: { id: eventId },
+      data: {
+        title: input.title,
+        startsAt: new Date(input.startsAt),
+        timezone: input.timezone,
+        kind: input.kind,
+        remindOffsetMinutes: input.remindOffsetMinutes,
+      },
+    });
+    return this.view(event);
+  }
+
   private async requirePair(userId: string) {
     const member = await this.membership.findActive(userId);
     if (!member) throw new ApiException(404, 'PARTNERSHIP_NOT_FOUND', 'You are not in a partnership');

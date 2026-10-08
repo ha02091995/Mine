@@ -97,6 +97,18 @@ paths:
       responses:
         '201':
           description: Event
+  /v1/events/{id}:
+    patch:
+      summary: Edit an event. The phone and the web read the same row.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event
   /v1/partnerships/{id}/leave:
     post:
       summary: Close the partnership for both members
