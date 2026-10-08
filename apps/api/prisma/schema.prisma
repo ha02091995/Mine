@@ -20,6 +20,9 @@ model User {
   invites     PairInvite[]
   notes       Note[]
   events      Event[]
+  messages    Message[]
+  receipts    MessageReceipt[]
+  secrets     SecretMessage[]
 
   @@map("users")
 }
@@ -64,6 +67,8 @@ model Partnership {
   invites PairInvite[]
   notes   Note[]
   events  Event[]
+  messages Message[]
+  secrets  SecretMessage[]
 
   @@map("partnerships")
 }
@@ -135,14 +140,68 @@ model Event {
 model PushDelivery {
   id        String   @id @default(uuid()) @db.Uuid
   deviceId  String   @map("device_id") @db.Uuid
-  eventId   String   @map("event_id") @db.Uuid
+  eventId   String?  @map("event_id") @db.Uuid
+  messageId String?  @map("message_id") @db.Uuid
   title     String
   body      String
   createdAt DateTime @default(now()) @map("created_at")
 
-  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-  event  Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  device  Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  event   Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  message Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, deviceId])
+  @@unique([messageId, deviceId])
   @@map("push_deliveries")
+}
+
+model Message {
+  id            String   @id @default(uuid()) @db.Uuid
+  partnershipId String   @map("partnership_id") @db.Uuid
+  senderId      String   @map("sender_id") @db.Uuid
+  clientMsgId   String   @map("client_msg_id")
+  kind          String
+  body          String?
+  stickerId     String?  @map("sticker_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  partnership Partnership      @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  sender      User             @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  receipts    MessageReceipt[]
+  pushes      PushDelivery[]
+
+  @@unique([partnershipId, clientMsgId])
+  @@index([partnershipId, createdAt])
+  @@map("messages")
+}
+
+model MessageReceipt {
+  id          String    @id @default(uuid()) @db.Uuid
+  messageId   String    @map("message_id") @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  deliveredAt DateTime? @map("delivered_at")
+  readAt      DateTime? @map("read_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@map("message_receipts")
+}
+
+model SecretMessage {
+  id            String    @id @default(uuid()) @db.Uuid
+  partnershipId String    @map("partnership_id") @db.Uuid
+  senderId      String    @map("sender_id") @db.Uuid
+  kind          String
+  body          String?
+  imageRef      String?   @map("image_ref")
+  revealedAt    DateTime? @map("revealed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  partnership Partnership @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  sender      User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([partnershipId, createdAt])
+  @@map("secret_messages")
 }
