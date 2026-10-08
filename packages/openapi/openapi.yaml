@@ -111,3 +111,80 @@ paths:
           description: Partnership closed
         '403':
           description: Caller is not an active member
+  /v1/media/uploads:
+    post:
+      summary: Reserve an image and return a signed PUT URL
+      responses:
+        '201':
+          description: Upload URL
+  /v1/media/{id}/content:
+    put:
+      summary: Store image bytes with the signed URL
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stored
+    get:
+      summary: Read image bytes with a signed URL
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Image bytes
+        '404':
+          description: Deleted or missing
+  /v1/media/{id}:
+    delete:
+      summary: Delete an image and invalidate signed URLs
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+  /v1/albums:
+    get:
+      summary: List albums in the partnership
+      responses:
+        '200':
+          description: Albums
+    post:
+      summary: Create an album
+      responses:
+        '201':
+          description: Album
+  /v1/albums/{id}/items:
+    post:
+      summary: Add an uploaded image to an album
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Album item
+  /v1/story-entries:
+    get:
+      summary: List story milestones for the caller's partnership
+      responses:
+        '200':
+          description: Story entries
+    post:
+      summary: Add a note or image milestone
+      responses:
+        '201':
+          description: Story entry

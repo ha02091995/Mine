@@ -23,6 +23,8 @@ model User {
   messages    Message[]
   receipts    MessageReceipt[]
   secrets     SecretMessage[]
+  media       MediaObject[]
+  stories     StoryEntry[]
 
   @@map("users")
 }
@@ -69,6 +71,9 @@ model Partnership {
   events  Event[]
   messages Message[]
   secrets  SecretMessage[]
+  media    MediaObject[]
+  albums   Album[]
+  stories  StoryEntry[]
 
   @@map("partnerships")
 }
@@ -111,8 +116,9 @@ model Note {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  partnership Partnership @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
-  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  partnership Partnership  @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  author      User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  stories     StoryEntry[]
 
   @@index([partnershipId, createdAt])
   @@map("notes")
@@ -204,4 +210,68 @@ model SecretMessage {
 
   @@index([partnershipId, createdAt])
   @@map("secret_messages")
+}
+
+model MediaObject {
+  id            String    @id @default(uuid()) @db.Uuid
+  partnershipId String    @map("partnership_id") @db.Uuid
+  ownerId       String    @map("owner_id") @db.Uuid
+  contentType   String    @map("content_type")
+  byteSize      Int?      @map("byte_size")
+  deletedAt     DateTime? @map("deleted_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  partnership Partnership  @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  items       AlbumItem[]
+  stories     StoryEntry[]
+
+  @@index([partnershipId, createdAt])
+  @@map("media_objects")
+}
+
+model Album {
+  id            String   @id @default(uuid()) @db.Uuid
+  partnershipId String   @map("partnership_id") @db.Uuid
+  title         String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  partnership Partnership @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  items       AlbumItem[]
+
+  @@index([partnershipId, createdAt])
+  @@map("albums")
+}
+
+model AlbumItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  albumId   String   @map("album_id") @db.Uuid
+  mediaId   String   @map("media_id") @db.Uuid
+  caption   String   @default("")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  album Album       @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  media MediaObject @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@index([albumId, createdAt])
+  @@map("album_items")
+}
+
+model StoryEntry {
+  id            String   @id @default(uuid()) @db.Uuid
+  partnershipId String   @map("partnership_id") @db.Uuid
+  authorId      String   @map("author_id") @db.Uuid
+  position      Int
+  noteId        String?  @map("note_id") @db.Uuid
+  mediaId       String?  @map("media_id") @db.Uuid
+  caption       String   @default("")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  partnership Partnership  @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  author      User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  note        Note?        @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  media       MediaObject? @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@index([partnershipId, position])
+  @@map("story_entries")
 }
