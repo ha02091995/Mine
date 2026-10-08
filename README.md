@@ -12,3 +12,24 @@ Tài liệu thiết kế nằm trong [`docs/lovebyte`](docs/lovebyte/README.md).
 | [Thiết kế hệ thống](docs/lovebyte/02-thiet-ke-he-thong.md) | Kiến trúc, dữ liệu, API, quyền riêng tư |
 | [Kế hoạch triển khai](docs/lovebyte/03-ke-hoach-trien-khai.md) | Các pha xây dựng và tiêu chí xong |
 | [Đa nền tảng](docs/lovebyte/04-ke-hoach-da-nen-tang.md) | iOS, Android, web và phần phải viết native |
+
+## Chạy local
+
+```bash
+bash scripts/up.sh
+cd apps/api
+cp .env.example .env
+npx prisma migrate deploy
+npm test
+npm start
+```
+
+App Flutter:
+
+```bash
+cd apps/mobile
+flutter test
+flutter run --dart-define=API_BASE=http://127.0.0.1:3000
+```
+
+OTP local được in trong log API khi `OTP_LOG_CODE=true`.
