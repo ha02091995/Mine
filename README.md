@@ -6,6 +6,13 @@ LoveByte gốc do LoveByte Pte. Ltd. phát hành trên iOS ngày 27/07/2012, sau
 
 Tài liệu thiết kế nằm trong [`docs/lovebyte`](docs/lovebyte/README.md).
 
+| Tài liệu | Nội dung |
+| --- | --- |
+| [Phân tích nhu cầu](docs/lovebyte/01-phan-tich-nhu-cau.md) | Việc app phải làm, phạm vi, ưu tiên |
+| [Thiết kế hệ thống](docs/lovebyte/02-thiet-ke-he-thong.md) | Kiến trúc, dữ liệu, API, quyền riêng tư |
+| [Kế hoạch triển khai](docs/lovebyte/03-ke-hoach-trien-khai.md) | Các pha xây dựng và tiêu chí xong |
+| [Đa nền tảng](docs/lovebyte/04-ke-hoach-da-nen-tang.md) | iOS, Android, web và phần phải viết native |
+
 ## Chạy local
 
 ```bash
@@ -26,10 +33,3 @@ flutter run --dart-define=API_BASE=http://127.0.0.1:3000
 ```
 
 OTP local được in trong log API khi `OTP_LOG_CODE=true`.
-
-| Tài liệu | Nội dung |
-| --- | --- |
-| [Phân tích nhu cầu](docs/lovebyte/01-phan-tich-nhu-cau.md) | Việc app phải làm, phạm vi, ưu tiên |
-| [Thiết kế hệ thống](docs/lovebyte/02-thiet-ke-he-thong.md) | Kiến trúc, dữ liệu, API, quyền riêng tư |
-| [Kế hoạch triển khai](docs/lovebyte/03-ke-hoach-trien-khai.md) | Các pha xây dựng và tiêu chí xong |
-| [Đa nền tảng](docs/lovebyte/04-ke-hoach-da-nen-tang.md) | iOS, Android, web và phần phải viết native |
