@@ -36,12 +36,47 @@ class Partnership {
   }
 }
 
+class Note {
+  Note({required this.id, required this.body});
+  final String id;
+  final String body;
+
+  factory Note.fromJson(Map<String, dynamic> json) {
+    return Note(id: json['id'] as String, body: json['body'] as String);
+  }
+}
+
+class CoupleEvent {
+  CoupleEvent({required this.id, required this.title, required this.countdownDays});
+  final String id;
+  final String title;
+  final int countdownDays;
+
+  factory CoupleEvent.fromJson(Map<String, dynamic> json) {
+    return CoupleEvent(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      countdownDays: json['countdownDays'] as int,
+    );
+  }
+}
+
 abstract class LovebyteApi {
   Future<void> requestOtp(String destination);
   Future<Session> createSession({required String destination, required String code, required String platform});
   Future<String> createInvite(String accessToken);
   Future<Partnership> acceptInvite(String accessToken, String code);
   Future<Partnership?> getPartnership(String accessToken);
+  Future<Partnership> updateStartedOn(String accessToken, String startedOn);
+  Future<List<Note>> listNotes(String accessToken);
+  Future<Note> createNote(String accessToken, String body);
+  Future<List<CoupleEvent>> listEvents(String accessToken);
+  Future<CoupleEvent> createEvent(
+    String accessToken, {
+    required String title,
+    required DateTime startsAt,
+    required int remindOffsetMinutes,
+  });
 }
 
 class HttpLovebyteApi implements LovebyteApi {
@@ -98,6 +133,47 @@ class HttpLovebyteApi implements LovebyteApi {
     }
   }
 
+  @override
+  Future<Partnership> updateStartedOn(String accessToken, String startedOn) async {
+    final json = await _send('PATCH', '/v1/partnership', token: accessToken, body: {'startedOn': startedOn});
+    return Partnership.fromJson(json);
+  }
+
+  @override
+  Future<List<Note>> listNotes(String accessToken) async {
+    final json = await _sendList('/v1/notes', token: accessToken);
+    return json.map(Note.fromJson).toList();
+  }
+
+  @override
+  Future<Note> createNote(String accessToken, String body) async {
+    final json = await _send('POST', '/v1/notes', token: accessToken, body: {'body': body});
+    return Note.fromJson(json);
+  }
+
+  @override
+  Future<List<CoupleEvent>> listEvents(String accessToken) async {
+    final json = await _sendList('/v1/events', token: accessToken);
+    return json.map(CoupleEvent.fromJson).toList();
+  }
+
+  @override
+  Future<CoupleEvent> createEvent(
+    String accessToken, {
+    required String title,
+    required DateTime startsAt,
+    required int remindOffsetMinutes,
+  }) async {
+    final json = await _send('POST', '/v1/events', token: accessToken, body: {
+      'title': title,
+      'startsAt': startsAt.toUtc().toIso8601String(),
+      'timezone': 'Asia/Ho_Chi_Minh',
+      'kind': 'anniversary',
+      'remindOffsetMinutes': remindOffsetMinutes,
+    });
+    return CoupleEvent.fromJson(json);
+  }
+
   Future<Map<String, dynamic>> _send(
     String method,
     String path, {
@@ -111,6 +187,8 @@ class HttpLovebyteApi implements LovebyteApi {
     switch (method) {
       case 'POST':
         response = await _client.post(uri, headers: headers, body: jsonEncode(body ?? {}));
+      case 'PATCH':
+        response = await _client.patch(uri, headers: headers, body: jsonEncode(body ?? {}));
       case 'GET':
         response = await _client.get(uri, headers: headers);
       default:
@@ -125,5 +203,17 @@ class HttpLovebyteApi implements LovebyteApi {
       );
     }
     return decoded;
+  }
+
+  Future<List<Map<String, dynamic>>> _sendList(String path, {String? token}) async {
+    final uri = Uri.parse('$baseUrl$path');
+    final headers = <String, String>{'Content-Type': 'application/json'};
+    if (token != null) headers['Authorization'] = 'Bearer $token';
+    final response = await _client.get(uri, headers: headers);
+    final decoded = response.body.isEmpty ? <dynamic>[] : jsonDecode(response.body) as List<dynamic>;
+    if (response.statusCode >= 400) {
+      throw ApiError(response.statusCode, 'HTTP_ERROR', 'Request failed');
+    }
+    return decoded.cast<Map<String, dynamic>>();
   }
 }

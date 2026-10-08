@@ -97,6 +97,24 @@ export class PairService {
     return this.view(member.partnership, members);
   }
 
+  async updateStartedOn(userId: string, startedOn: string) {
+    const member = await this.membership.findActive(userId);
+    if (!member) {
+      throw new ApiException(404, 'PARTNERSHIP_NOT_FOUND', 'You are not in a partnership');
+    }
+    const [year, month, day] = startedOn.split('-').map(Number);
+    const partnership = await this.prisma.partnership.update({
+      where: { id: member.partnershipId },
+      data: { startedOn: new Date(Date.UTC(year, month - 1, day)) },
+    });
+    const members = await this.prisma.partnershipMember.findMany({
+      where: { partnershipId: partnership.id, status: 'active' },
+      include: { user: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    return this.view(partnership, members);
+  }
+
   async leave(userId: string, partnershipId: string) {
     await this.membership.requireActive(userId, partnershipId);
     await this.prisma.$transaction([
